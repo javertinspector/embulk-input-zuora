@@ -1,11 +1,11 @@
-# Zuora input plugin for Embulk
+# Embulk input plugin for Zuora
 
-TODO: Write short description here and embulk-input-zuora.gemspec file.
+
 
 ## Overview
 
 * **Plugin type**: input
-* **Resume supported**: yes
+* **Resume supported**: no
 * **Cleanup supported**: no
 * **Guess supported**: no
 
@@ -13,12 +13,13 @@ TODO: Write short description here and embulk-input-zuora.gemspec file.
 
 
 - **base_url**: Base URL for REST API endpoint (string, required)
-- **auth_method**: `basic` or `oauth` (string, default: `null`, required) # oauth is to be added
+- **auth_method**: `basic`(string, default: `null`, required)  # **NOTE** : `oauth` is to be added
 - **username**: Username(email address). Required if `auth_method` is `basic` (string, default: `null`)
 - **password**: Password for the username above. Also Required if `auth_method` is `basic` (string, default: `null`)
 - **query**: ZOQL (Zuora Obeject Query Language) query. Required if call with query (string, default: `null`) # note: please refer to ZOQL documentation
 - **object**: Target Zuora object name. Required if `query` is not set (string, default: `null`)
 - **where**: Filter condition for query. Required if `query` is not set (string, default: `null`)
+- **columns**: Columns to extrat. Required if `query` is not set (array, default: `null`)
 - **retry_limit**: Maximum counts to retry (integer, default: 5)
 - **retry_wait_sec**: Seconds to wait before retrying (integer, default: 5)
 
@@ -31,7 +32,7 @@ in:
   auth_method: basic
   username: zuora@example.com
   password: example_password
-  query: "Select * From Account"
+  query: "select Id, CreatedDate from Account" # need to specify column name (* is not allowed in ZOQL)
 ```
 
 ```yaml
