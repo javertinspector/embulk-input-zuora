@@ -2,10 +2,10 @@ module Embulk
   module Input
     module Zuora
       class Zoql
-        attr_reader :task
+        attr_reader :config
 
-        def initialize(task)
-          @task = task
+        def initialize(config)
+          @config = config
         end
 
         # keyword should be lowercase
@@ -15,7 +15,7 @@ module Embulk
           when :integrated
             formated_query
           when :separated
-            "select #{target_column_names} from #{task[:object]} #{where_clause}"
+            "select #{target_column_names} from #{config[:object]} #{where_clause}"
           end
         end
 
@@ -23,16 +23,16 @@ module Embulk
           case type
           when :integrated
             column_names_in_query.map{ |name|
-              {name: name, type: :string}
+              {name: name, type: :string, format: nil}
             }
           when :separated
-            task[:columns]
+            config[:columns]
           end
         end
 
         private
         def column_names_in_query
-          task[:query].slice(str_index('select') + 6, str_index('from') - 1 - 6).gsub(/^ /,"").split(",")
+          config[:query].slice(str_index('select') + 6, str_index('from') - 1 - 6).gsub(/^ /,"").split(",")
         end
 
         def str_index(keyword)
@@ -40,21 +40,21 @@ module Embulk
         end
 
         def target_column_names
-          task[:columns].map{|col| col[:name]}.join(",")
+          config[:columns].map{|col| col[:name]}.join(",")
         end
 
         def where_clause
-          "Where #{@task[:where]}" if @task[:where]
+          "Where #{config[:where]}" if config[:where]
         end
 
         def formated_query
-          task[:query].sub(/Select/,"select").sub(/From/,"from")
+          config[:query].sub(/Select/,"select").sub(/From/,"from")
         end
 
         def type
-          if task[:query]
+          if config[:query]
             :integrated
-          elsif task[:object] && task[:columns].size > 0
+          elsif config[:object] && config[:columns].size > 0
             :separated
           else
             raise Embulk::ConfigError.new("Parameters for ZOQL is missing. please check query:, or object: and columns:")
