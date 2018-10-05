@@ -13,11 +13,13 @@ module Embulk
         end
 
         def httpclient
-          clnt = HTTPClient.new
-          clnt.connect_timeout = 300
-          clnt.receive_timeout = 300
-          auth(clnt)
-          clnt
+          @httpclient ||=
+            begin
+              clnt = HTTPClient.new
+              clnt.connect_timeout = 300
+              clnt.receive_timeout = 300
+              auth(clnt)
+            end
         end
 
         def export(&block)
@@ -34,7 +36,7 @@ module Embulk
           while true
             query = {"queryLocator": query_locator}.to_json
             response_body = JSON.parse(request(path, query).body)
-            query_locator = response["queryLocator"]
+            query_locator = response_body["queryLocator"]
             fetched_records << response_body["records"]
             break if response_body["done"]
           end
@@ -46,9 +48,6 @@ module Embulk
         def request(path, query)
           uri = URI.parse(config[:base_url])
           uri.path = path
-
-          puts uri.to_s
-          puts query
 
           retryer.with_retry do
             Embulk.logger.debug "Fetching #{uri.to_s}"
