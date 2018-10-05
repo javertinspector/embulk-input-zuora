@@ -13,10 +13,10 @@
 
 
 - **base_url**: Base URL for REST API endpoint (string, required)
-- **auth_method**: `basic`(string, default: `null`, required)  # **NOTE** : `oauth` is to be added
+- **auth_method**: `basic`(string, default: `null`, required)
 - **username**: Username(email address). Required if `auth_method` is `basic` (string, default: `null`)
 - **password**: Password for the username above. Also Required if `auth_method` is `basic` (string, default: `null`)
-- **query**: ZOQL (Zuora Obeject Query Language) query. Required if call with query (string, default: `null`) # note: please refer to ZOQL documentation
+- **query**: ZOQL (Zuora Obeject Query Language) query. Required if call with query (string, default: `null`)
 - **object**: Target Zuora object name. Required if `query` is not set (string, default: `null`)
 - **where**: Filter condition for query. Required if `query` is not set (string, default: `null`)
 - **columns**: Columns to extrat. Required if `query` is not set (array, default: `null`)
@@ -25,6 +25,7 @@
 
 ## Example
 
+### using query parameter
 ```yaml
 in:
   type: zuora
@@ -35,6 +36,7 @@ in:
   query: "select Id, CreatedDate from Account" # need to specify column name (* is not allowed in ZOQL)
 ```
 
+### using object, where, columns parameters
 ```yaml
 in:
   type: zuora
@@ -57,3 +59,6 @@ in:
 ```
 $ rake
 ```
+
+## References
+- [ZOQL documentation](https://knowledgecenter.zuora.com/DC_Developers/K_Zuora_Object_Query_Language)
