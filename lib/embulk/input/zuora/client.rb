@@ -18,7 +18,7 @@ module Embulk
         def connect
           path = uri_suffix("connections")
           query = {}
-          response_body = JSON.parse(request(path, query).body)
+          response_body = JSON.parse(post(path, query).body)
           raise Embulk::DataError.new("initial connect is failed") unless response_body["success"]
         end
 
@@ -36,7 +36,7 @@ module Embulk
           puts config
           first_path  = uri_suffix("query", true)
           first_query = {"queryString": zoql.compose }.to_json
-          first_response_body = JSON.parse(request(first_path, first_query).body)
+          first_response_body = JSON.parse(post(first_path, first_query).body)
 
           total_rows = first_response_body["size"].to_i
           apicall_cnt = 1
@@ -49,7 +49,7 @@ module Embulk
           while true
             apicall_cnt += 1
             query = {"queryLocator": query_locator}.to_json
-            response_body = JSON.parse(request(path, query).body)
+            response_body = JSON.parse(post(path, query).body)
 
             Embulk.logger.info "Fetching #{EXPORT_ROWS_IN_ONE_CALL * apicall_cnt}/#{total_rows} rows"
             response_body["records"].each{|record| block.call record}
@@ -58,7 +58,7 @@ module Embulk
           end
         end
 
-        def request(path, query)
+        def post(path, query)
           uri = URI.parse(config[:base_url])
           uri.path = path
 
