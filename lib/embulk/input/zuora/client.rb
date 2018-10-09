@@ -12,6 +12,14 @@ module Embulk
 
         def initialize(config)
           @config = config
+          connect
+        end
+
+        def connect
+          path = uri_suffix("connections")
+          query = {}
+          response_body = JSON.parse(request(path, query).body)
+          raise Embulk::DataError.new("initial connect is failed") unless response_body["success"]
         end
 
         def httpclient
@@ -26,7 +34,7 @@ module Embulk
 
         def export(&block)
           puts config
-          first_path  = endpoint_suffix(true)
+          first_path  = uri_suffix("query", true)
           first_query = {"queryString": zoql.compose }.to_json
           first_response_body = JSON.parse(request(first_path, first_query).body)
 
@@ -37,7 +45,7 @@ module Embulk
 
 
           query_locator = first_response_body["queryLocator"]
-          path = endpoint_suffix
+          path = uri_suffix("query")
           while true
             apicall_cnt += 1
             query = {"queryLocator": query_locator}.to_json
@@ -83,13 +91,24 @@ module Embulk
           end
         end
 
-        def endpoint_suffix(initial = false)
-          path_suffix = initial ? "/action/query" : "/action/queryMore"
-          "/v1#{path_suffix}"
+        def uri_suffix(endpoint_name, initial = false)
+          case endpoint_name
+          when "query"
+            path_suffix = initial ? endpoint_name : "#{endpoint_name}More"
+            "#{common_path_part}/action/#{path_suffix}"
+          when "connections"
+            "#{common_path_part}/#{endpoint_name}"
+          else
+              raise Embulk::ConfigError.new("Unable to detect endpoint name : #{endpoint_name}")
+          end
         end
 
         def zoql
           Zoql.new(config)
+        end
+
+        def common_path_part
+          "/v1"
         end
 
         def retryer
