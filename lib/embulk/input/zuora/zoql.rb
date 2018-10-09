@@ -32,7 +32,7 @@ module Embulk
 
         private
         def column_names_in_query
-          config[:query].slice(str_index('select') + 6, str_index('from') - 1 - 6).gsub(/^ /,"").split(",")
+          config[:query].slice(str_index('select') + 6, str_index('from') - 1 - 6).gsub(/ /,"").split(",")
         end
 
         def str_index(keyword)
