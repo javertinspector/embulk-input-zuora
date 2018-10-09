@@ -8,6 +8,8 @@ module Embulk
       class Client
         attr_reader :config
 
+        EXPORT_ROWS_IN_ONE_CALL=2000
+
         def initialize(config)
           @config = config
         end
@@ -24,24 +26,27 @@ module Embulk
 
         def export(&block)
           puts config
-          fetched_records = []
           first_path  = endpoint_suffix(true)
           first_query = {"queryString": zoql.compose }.to_json
           first_response_body = JSON.parse(request(first_path, first_query).body)
 
-          query_locator = first_response_body["queryLocator"]
-          fetched_records << first_response_body["records"]
+          total_rows = first_response_body["size"].to_i
+          apicall_cnt = 1
+          Embulk.logger.info "Fetching #{EXPORT_ROWS_IN_ONE_CALL * apicall_cnt}/#{total_rows} rows"
+          first_response_body["records"].each{|record| block.call record}
 
+
+          query_locator = first_response_body["queryLocator"]
           path = endpoint_suffix
           while true
+            apicall_cnt += 1
             query = {"queryLocator": query_locator}.to_json
             response_body = JSON.parse(request(path, query).body)
+
+            Embulk.logger.info "Fetching #{EXPORT_ROWS_IN_ONE_CALL * apicall_cnt}/#{total_rows} rows"
+            response_body["records"].each{|record| block.call record}
             query_locator = response_body["queryLocator"]
-            fetched_records << response_body["records"]
             break if response_body["done"]
-          end
-          fetched_records.flatten.each do |record|
-            block.call record
           end
         end
 
