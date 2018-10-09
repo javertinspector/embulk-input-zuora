@@ -11,6 +11,7 @@
 
 ## Configuration
 
+NOTE: OAUTH2 and AQuA API is not supported yet.
 
 - **base_url**: Base URL for REST API endpoint (string, required)
 - **auth_method**: `basic`(string, default: `null`, required)
@@ -23,7 +24,7 @@
 - **retry_limit**: Maximum counts to retry (integer, default: 5)
 - **retry_wait_sec**: Seconds to wait before retrying (integer, default: 5)
 
-## Example
+## Examples
 
 ### using query parameter
 ```yaml
@@ -60,5 +61,5 @@ in:
 $ rake
 ```
 
-## References
+## Reference
 - [ZOQL documentation](https://knowledgecenter.zuora.com/DC_Developers/K_Zuora_Object_Query_Language)
